@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="docs_200/|it/uniroma1/lcl/babelnet/|it/uniroma1/lcl/knowledge/custom/|it/uniroma1/lcl/|docs_200/docs_200/" kind="src" path="src"/>
+	<classpathentry excluding="docs_200/" kind="src" path="src/docs_200"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="BabelNet-API-2.0.1/babelnet-api-2.0.1.jar"/>
+	<classpathentry kind="lib" path="stanford-corenlp-1.3.5-models.jar"/>
+	<classpathentry kind="lib" path="stanford-corenlp-1.3.5.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
