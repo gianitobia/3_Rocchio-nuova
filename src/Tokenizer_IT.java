@@ -185,9 +185,9 @@ public class Tokenizer_IT {
     private ArrayList<String> tokenizeString(String stringa) {
         ArrayList<String> tokens = new ArrayList<>();
         String[] parole = stringa.split("[\\W]");
-        for (String parole1 : parole) {
-            if (!stopWords.contains(parole1.toLowerCase()) && !parole1.equals("")) {
-                tokens.add(parole1);
+        for (String parola : parole) {
+            if (!stopWords.contains(parola.toLowerCase()) && !parola.equals("")) {
+                tokens.add(parola);
             }
         }
         return tokens;
