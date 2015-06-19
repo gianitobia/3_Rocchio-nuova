@@ -211,7 +211,7 @@ public class Rocchio {
 
     public double[] calcolaTFVettore(String path) {
         double[] tf_vettore;
-        dict.generaDizionarioDaPath(path);
+        dict.generaDizionarioDaPathFile(path);
         String[] parole = dict.getDizionario();
 
         tf_vettore = new double[parole.length];

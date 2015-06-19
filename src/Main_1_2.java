@@ -1,4 +1,4 @@
-
+﻿
 public class Main_1_2 {
 
     // classe contenente il metodo rocchio
@@ -18,18 +18,19 @@ public class Main_1_2 {
         // genero dizionario leggendo i 200 file e passandoli al tokenizer il
         // quale può
         // - o tokenizzarli e lemmatizzarli usando morph_it
-        // per far ci�� prima il testo viene suddiviso in linee e poi ogni linea
+        // per far ciò prima il testo viene suddiviso in linee e poi ogni linea
         // viene tokenizzata, e poi ogni parola trovata viene confrontata con le
         // info date da morph-it per lemmatizzarla
         // - o li tokenizza, li lemmatizza e poi li riduce ai babelid usando
         // babelnet
         rocchio = new Rocchio(npos, babel, types, Dizionario.Lang.IT);
         System.out.println("leggo tutti i documenti e genero il dizionario");
-//         double[][] tf_matrix = rocchio.calcolaTFMatrix();
-//         System.out.println("genero la tf_matrix");
-//         rocchio.writeTFMatrix(tf_matrix);
-//         System.out.println("termino la scrittura della tf_matrix");
-//         rocchio.calcolaCentroidi(types,tf_matrix);
-    }
+
+        double[][] tf_matrix = rocchio.calcolaTFMatrix();
+        System.out.println("genero la tf_matrix");
+        rocchio.writeTFMatrix(tf_matrix);
+        System.out.println("termino la scrittura della tf_matrix");
+        rocchio.calcolaCentroidi(types, tf_matrix);
+   }
 
 }

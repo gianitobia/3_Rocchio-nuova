@@ -97,7 +97,7 @@ public class Dizionario {
         }
     }
 
-    public void generaDizionarioDaPath(String path) {
+    public void generaDizionarioDaPathFile(String path) {
         try {
             ArrayList<String> linee = (ArrayList<String>) Files.readAllLines(
                     Paths.get(path), Charset.defaultCharset());
