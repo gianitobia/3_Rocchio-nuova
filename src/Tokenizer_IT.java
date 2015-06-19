@@ -38,8 +38,16 @@ public class Tokenizer_IT {
                     "config/babelnet.properties"));
             bn = BabelNet.getInstance();
         }
-        getStopWords();
-        getLemmi();
+          stopWords = getStopWords();
+          lemmi = getLemmi();
+//        ArrayList<String> lista_parole = new ArrayList<>();
+//        ArrayList<ArrayList<String>> lista_parole_noStopword = new ArrayList<>();
+//        lista_parole_noStopword = removeStopwordsFromList(lista_parole);
+//        lista_parole_noStopword = getLemsFromContexts(lista_parole_noStopword);
+//         for(int i = 0; i < lista_parole_noStopword.size(); i++){
+//            System.out.println(lista_parole_noStopword);
+//        }
+       
     }
 
     // tokenizza una singola stringa di parole
@@ -51,7 +59,7 @@ public class Tokenizer_IT {
                 // versione con lemmi
                 ArrayList<String> parole_lemmatizzate = lemmatizza(parole_da_lem);
                 parole = getBabelNetID(parole_lemmatizzate);
-
+                System.out.println(parole);
                 // versione senza lemmi
                 // parole = getBabelNetID(parole_lemmatizzate);
             } else {
@@ -60,14 +68,12 @@ public class Tokenizer_IT {
         } else {
             parole = null;
         }
-
         return parole;
 
     }
 
     // tokenizza un ArrayList contenente stringhe di parole
-    public ArrayList<ArrayList<String>> analizzaListaTesti(
-            ArrayList<String> testi) {
+    public ArrayList<ArrayList<String>> analizzaListaTesti(ArrayList<String> testi) {
         ArrayList<ArrayList<String>> lista_parole = new ArrayList<>();
         for (String testo : testi) {
             if (!"".equals(testo)) {
@@ -164,6 +170,8 @@ public class Tokenizer_IT {
             if (context.contains(parola)) {
                 overlap++;
             }
+//             System.out.println(parola +"' thanks to an overlap equals"
+//                    + " to " + overlap);
         }
         return overlap;
     }
@@ -171,11 +179,17 @@ public class Tokenizer_IT {
     // lemmatizzazione di una stringa
     private ArrayList<String> lemmatizza(ArrayList<String> parole_da_lem) {
         ArrayList<String> parole = new ArrayList<>();
-        for (String parola : parole_da_lem) {
-            if (lemmi.containsKey(parola.toLowerCase())) {
-                parole.add(lemmi.get(parola.toLowerCase()));
-            } else {
-                parole.add(parola.toLowerCase());
+        for(int i = 0; i < parole_da_lem.size(); i++){
+            String lemma = lemmi.get(parole_da_lem.get(i));
+//            if (lemmi.containsKey(parola.toLowerCase())) {
+//                parole.add(lemmi.get(parola.toLowerCase()));
+//            } else {
+//                parole.add(parola.toLowerCase());
+//            }
+            if(lemma!= null){
+                parole.add(lemma);
+            }else{
+                parole.add(parole_da_lem.get(i));
             }
         }
         return parole;
@@ -203,7 +217,7 @@ public class Tokenizer_IT {
 //		}
 //		return lista_stringhe_tokenizzate;
 //	}
-    private void getLemmi() {
+    private static HashMap<String,String> getLemmi() {
         lemmi = new HashMap<>();
 
         try {
@@ -211,19 +225,20 @@ public class Tokenizer_IT {
             BufferedReader br = new BufferedReader(new FileReader(
                     "src/morphit/morph-it_048.txt"));
             while ((line = br.readLine()) != null) {
-                String[] split = line.split("\\t");
-                if (split.length == 3) {
-                    lemmi.put(split[0], split[1]);
+                if (line.indexOf("|") < 0 && !line.equals("")) {
+                    String[] row = line.split("[\\s]+");
+                    lemmi.put(row[0], row[1]);
                 }
             }
             br.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return lemmi;
     }
 
     // popola l'hashset di stopwords leggendo le stopwords da file
-    private void getStopWords() {
+    private static Set<String> getStopWords() {
 
         stopWords = new LinkedHashSet<>();
 
@@ -238,7 +253,7 @@ public class Tokenizer_IT {
             }
             br.close();
 
-            br = new BufferedReader(new FileReader("src/stopwords_it.txt"));
+            br = new BufferedReader(new FileReader("resources/jlt/stopwords/stopwords_it.txt"));
             while ((line = br.readLine()) != null) {
                 stopWords.add(line);
             }
@@ -251,6 +266,48 @@ public class Tokenizer_IT {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        return stopWords;
     }
-
+    
+       public static ArrayList<String> removeStopwordsFromContexts(String frase) {
+        ArrayList<String> array_tokens = new ArrayList<>();
+        Set<String> stopwords = getStopWords();
+        String[] words = frase.split("[\\s]+");
+        for (String word : words) {
+            String clean_word = word.replaceAll("[ \\p{Punct}]", " ");
+            String[] tokens = clean_word.split("[\\s]+");
+            for(String token : tokens)
+            {
+                if (!stopwords.contains(token.toLowerCase()))
+                    array_tokens.add(token);
+            }
+        }
+        return array_tokens;
+    }
+       
+       public static ArrayList<ArrayList<String>> removeStopwordsFromList(ArrayList<String> lista){
+        ArrayList<ArrayList<String>> lista_stopwords_rimosse = new ArrayList<>();
+        for(String word : lista)
+        {
+            lista_stopwords_rimosse.add(removeStopwordsFromContexts(word));
+        }
+        return lista_stopwords_rimosse;
+    }
+       
+         public static ArrayList<ArrayList<String>> getLemsFromContexts(ArrayList<ArrayList<String>> lems){
+         ArrayList<ArrayList<String>> lista_lemmi_contesti = new ArrayList<>();
+        
+        for (int i = 0; i < lems.size(); i++) {
+            ArrayList<String> lemmi_contesto = new ArrayList<>();
+            for(int j = 0; j < lems.get(i).size(); j++){
+                 String lemma = lemmi.get(lems.get(i).get(j));
+                if(lemma != null)
+                     lemmi_contesto.add(lemma);
+                else
+                    lemmi_contesto.add(lems.get(i).get(j));
+            }
+            lista_lemmi_contesti.add(lemmi_contesto);
+        }
+        return lista_lemmi_contesti;
+    }
 }

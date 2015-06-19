@@ -25,11 +25,11 @@ public class Main_1_2 {
         // babelnet
         rocchio = new Rocchio(npos, babel, types, Dizionario.Lang.IT);
         System.out.println("leggo tutti i documenti e genero il dizionario");
-        // double[][] tf_matrix = rocchio.calcolaTFMatrix();
-        // System.out.println("genero la tf_matrix");
-        // rocchio.writeTFMatrix(tf_matrix);
-        // System.out.println("termino la scrittura della tf_matrix");
-        // rocchio.calcolaCentroidi(types,tf_matrix);
+//         double[][] tf_matrix = rocchio.calcolaTFMatrix();
+//         System.out.println("genero la tf_matrix");
+//         rocchio.writeTFMatrix(tf_matrix);
+//         System.out.println("termino la scrittura della tf_matrix");
+//         rocchio.calcolaCentroidi(types,tf_matrix);
     }
 
 }
