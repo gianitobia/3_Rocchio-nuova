@@ -63,14 +63,12 @@ public class Dizionario {
         int index = 0;
         for (String type : types) {
             for (int i = 1; i <= 20; i++) {
-
                 try {
                     ArrayList<String> linee = (ArrayList<String>) Files
                             .readAllLines(
                                     Paths.get("src/docs_200/" + type + "_"
                                             + (i < 10 ? "0" + i : i) + ".txt"),
                                     Charset.forName("CP850"));
-
                     ArrayList<ArrayList<String>> testiAnalizzati = tokenizerIT
                             .analizzaListaTesti(linee);
 
