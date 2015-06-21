@@ -48,3 +48,4 @@ dist/
 resources
 config
 *.jar
+*.log

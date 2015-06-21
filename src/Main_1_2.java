@@ -1,4 +1,4 @@
-﻿
+
 public class Main_1_2 {
 
     // classe contenente il metodo rocchio
@@ -11,7 +11,7 @@ public class Main_1_2 {
 
     public static void main(String args[]) {
         npos = false;
-        babel = false;
+        babel = true;
         String[] types = {"ambiente", "cinema", "cucina", "economia_finanza",
             "motori", "politica", "salute", "scie_tecnologia",
             "spettacoli", "sport"};
@@ -31,6 +31,6 @@ public class Main_1_2 {
         rocchio.writeTFMatrix(tf_matrix);
         System.out.println("termino la scrittura della tf_matrix");
         rocchio.calcolaCentroidi(types, tf_matrix);
-   }
+    }
 
 }

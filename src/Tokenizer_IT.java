@@ -1,8 +1,8 @@
 
+import it.uniroma1.lcl.babelnet.BabelGloss;
 import it.uniroma1.lcl.babelnet.BabelNet;
 import it.uniroma1.lcl.babelnet.BabelNetConfiguration;
 import it.uniroma1.lcl.babelnet.BabelSynset;
-import it.uniroma1.lcl.babelnet.data.BabelGloss;
 import it.uniroma1.lcl.jlt.util.Language;
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -38,8 +40,8 @@ public class Tokenizer_IT {
                     "config/babelnet.properties"));
             bn = BabelNet.getInstance();
         }
-          stopWords = getStopWords();
-          lemmi = getLemmi();
+        stopWords = getStopWords();
+        lemmi = getLemmi();
 //        ArrayList<String> lista_parole = new ArrayList<>();
 //        ArrayList<ArrayList<String>> lista_parole_noStopword = new ArrayList<>();
 //        lista_parole_noStopword = removeStopwordsFromList(lista_parole);
@@ -47,7 +49,7 @@ public class Tokenizer_IT {
 //         for(int i = 0; i < lista_parole_noStopword.size(); i++){
 //            System.out.println(lista_parole_noStopword);
 //        }
-       
+
     }
 
     // tokenizza una singola stringa di parole
@@ -123,8 +125,13 @@ public class Tokenizer_IT {
             } else {
                 // TODO Auto-generated catch block
 
-                List<BabelSynset> list_synset = bn.getSynsets(Language.IT,
-                        parola);
+                List<BabelSynset> list_synset = new ArrayList<>();
+                try {
+                    list_synset = bn.getSynsets(Language.IT,
+                            parola);
+                } catch (IOException ex) {
+                    Logger.getLogger(Tokenizer_IT.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 if (list_synset.size() > 0) {
                     synset = list_synset.get(0);
                     parole.add(synset.getId().toString());
@@ -142,10 +149,20 @@ public class Tokenizer_IT {
             List<String> context) {
         // TODO Auto-generated catch block
 
-        List<BabelSynset> synsets = bn.getSynsets(Language.IT, parola);
+        List<BabelSynset> synsets = new ArrayList<>();
+        try {
+            synsets = bn.getSynsets(Language.IT, parola);
+        } catch (IOException ex) {
+            Logger.getLogger(Tokenizer_IT.class.getName()).log(Level.SEVERE, null, ex);
+        }
         int o = 0, index = -1;
         for (BabelSynset synset : synsets) {
-            List<BabelGloss> glosse = synset.getGlosses();
+            List<BabelGloss> glosse = new ArrayList<>();
+            try {
+                glosse = synset.getGlosses();
+            } catch (IOException ex) {
+                Logger.getLogger(Tokenizer_IT.class.getName()).log(Level.SEVERE, null, ex);
+            }
             int overlap = 0;
             for (BabelGloss glossa : glosse) {
                 overlap += computeOverlap(context, glossa.getGloss());
@@ -179,16 +196,16 @@ public class Tokenizer_IT {
     // lemmatizzazione di una stringa
     private ArrayList<String> lemmatizza(ArrayList<String> parole_da_lem) {
         ArrayList<String> parole = new ArrayList<>();
-        for(int i = 0; i < parole_da_lem.size(); i++){
+        for (int i = 0; i < parole_da_lem.size(); i++) {
             String lemma = lemmi.get(parole_da_lem.get(i));
 //            if (lemmi.containsKey(parola.toLowerCase())) {
 //                parole.add(lemmi.get(parola.toLowerCase()));
 //            } else {
 //                parole.add(parola.toLowerCase());
 //            }
-            if(lemma!= null){
+            if (lemma != null) {
                 parole.add(lemma);
-            }else{
+            } else {
                 parole.add(parole_da_lem.get(i));
             }
         }
@@ -217,7 +234,7 @@ public class Tokenizer_IT {
 //		}
 //		return lista_stringhe_tokenizzate;
 //	}
-    private static HashMap<String,String> getLemmi() {
+    private static HashMap<String, String> getLemmi() {
         lemmi = new HashMap<>();
 
         try {
@@ -268,43 +285,43 @@ public class Tokenizer_IT {
         }
         return stopWords;
     }
-    
-       public static ArrayList<String> removeStopwordsFromContexts(String frase) {
+
+    public static ArrayList<String> removeStopwordsFromContexts(String frase) {
         ArrayList<String> array_tokens = new ArrayList<>();
         Set<String> stopwords = getStopWords();
         String[] words = frase.split("[\\s]+");
         for (String word : words) {
             String clean_word = word.replaceAll("[ \\p{Punct}]", " ");
             String[] tokens = clean_word.split("[\\s]+");
-            for(String token : tokens)
-            {
-                if (!stopwords.contains(token.toLowerCase()))
+            for (String token : tokens) {
+                if (!stopwords.contains(token.toLowerCase())) {
                     array_tokens.add(token);
+                }
             }
         }
         return array_tokens;
     }
-       
-       public static ArrayList<ArrayList<String>> removeStopwordsFromList(ArrayList<String> lista){
+
+    public static ArrayList<ArrayList<String>> removeStopwordsFromList(ArrayList<String> lista) {
         ArrayList<ArrayList<String>> lista_stopwords_rimosse = new ArrayList<>();
-        for(String word : lista)
-        {
+        for (String word : lista) {
             lista_stopwords_rimosse.add(removeStopwordsFromContexts(word));
         }
         return lista_stopwords_rimosse;
     }
-       
-         public static ArrayList<ArrayList<String>> getLemsFromContexts(ArrayList<ArrayList<String>> lems){
-         ArrayList<ArrayList<String>> lista_lemmi_contesti = new ArrayList<>();
-        
+
+    public static ArrayList<ArrayList<String>> getLemsFromContexts(ArrayList<ArrayList<String>> lems) {
+        ArrayList<ArrayList<String>> lista_lemmi_contesti = new ArrayList<>();
+
         for (int i = 0; i < lems.size(); i++) {
             ArrayList<String> lemmi_contesto = new ArrayList<>();
-            for(int j = 0; j < lems.get(i).size(); j++){
-                 String lemma = lemmi.get(lems.get(i).get(j));
-                if(lemma != null)
-                     lemmi_contesto.add(lemma);
-                else
+            for (int j = 0; j < lems.get(i).size(); j++) {
+                String lemma = lemmi.get(lems.get(i).get(j));
+                if (lemma != null) {
+                    lemmi_contesto.add(lemma);
+                } else {
                     lemmi_contesto.add(lems.get(i).get(j));
+                }
             }
             lista_lemmi_contesti.add(lemmi_contesto);
         }
