@@ -17,11 +17,15 @@ public class Main_3 {
     // abilita o no la variante con l'utilizzo dei babelnet id invece che i
     // lemmi
     static boolean babel;
+    static boolean npos;
+    static boolean print;
 
     public static void main(String args[]) {
         babel = false;
-        rocchio = new Rocchio(babel, Dizionario.Lang.IT);
-        // tf_matrice = rocchio.leggiTFMatrice();
+        npos = false;
+        print = true;
+        rocchio = new Rocchio(npos, babel, Dizionario.Lang.IT, print);
+        tf_matrice = rocchio.leggiTFMatrice();
         tf_vettore = rocchio.calcolaTFVettore("src/docs_200/sport_05.txt");
 
         String[] types = {"ambiente", "cinema", "cucina", "economia_finanza",
@@ -40,8 +44,10 @@ public class Main_3 {
             }
         }
 
-        System.out.println("L'articolo fa parte della classe " + types[index]
-                + " con similarita' pari a " + largest);
+        if (print) {
+            System.out.println("L'articolo fa parte della classe " + types[index]
+                    + " con similarita' pari a " + largest);
+        }
     }
 
     static void calcolaCosSimilarity() {
@@ -51,8 +57,10 @@ public class Main_3 {
                         .calcolaCosSimilarity(tf_matrice[i], tf_vettore);
             }
         } else {
-            System.out
-                    .println("Il documento non contiene lo stesso dizionario del database di documenti");
+            if (print) {
+                System.out
+                        .println("Il documento non contiene lo stesso dizionario del database di documenti");
+            }
         }
     }
 }

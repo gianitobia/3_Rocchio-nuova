@@ -10,52 +10,64 @@ import java.util.logging.Logger;
 
 public class Rocchio {
 
-    static Dizionario dict;
+    Dizionario dict;
     // array contenente tutte le parole incontrate nei 200 documenti
-    static String[] parole;
+    String[] parole;
     // abilita o no la variante con il calcolo dei near positive invece dei neg
-    static boolean npos;
+    boolean npos;
     // abilita o no la variante con l'utilizzo dei babelnet id invece che i
     // lemmi
-    static boolean babel;
+    boolean babel;
+    boolean print;
+    double[][] tf_matrix;
 
+    /*
+     * parte relativa al main_1_2
+     */
     public Rocchio(boolean npos_flag, boolean babel_flag, String[] classi,
-            Dizionario.Lang language) {
+            Dizionario.Lang language, boolean print) {
         npos = npos_flag;
         babel = babel_flag;
-        dict = new Dizionario(babel, language);
-        dict.generaDizionario(classi);
+        dict = new Dizionario(babel, language, print);
+        dict.generaDizionarioDaListaType(classi);
+        this.print = print;
     }
 
-    public Rocchio(boolean babel_flag, Dizionario.Lang language) {
+    /*
+     * parte relativa al main_3
+     */
+    public Rocchio(boolean npos_flag, boolean babel_flag,
+            Dizionario.Lang language, boolean print) {
+        npos = npos_flag;
         babel = babel_flag;
-        dict = new Dizionario(babel, language);
+        dict = new Dizionario(babel, language, print);
+        this.print = print;
     }
 
     /*
      * parte relativa al main_1_2
      */
-    public double[][] calcolaTFMatrix() {
-
+    public void calcolaTFMatrix() {
         parole = dict.getDizionario();
+        tf_matrix = new double[200][parole.length];
 
-        double[][] tf_matrix = new double[200][parole.length];
         for (int i = 0; i < tf_matrix.length; i++) {
             for (int j = 0; j < tf_matrix[0].length; j++) {
                 int[] docs = dict.getOccorrenze(parole[j]);
                 double count = 0;
-                for (int doc : docs) {
-                    if (doc != 0) {
-                        count++;
+                if (docs != null) {
+                    for (int doc : docs) {
+                        if (doc != 0) {
+                            count++;
+                        }
                     }
                 }
                 tf_matrix[i][j] = ((double) docs[i]) * Math.log(200 / count);
             }
         }
-        return tf_matrix;
     }
 
-    public void writeTFMatrix(double[][] tf_matrix) {
+    public void writeTFMatrix() {
         String text = "";
         for (int i = 0; i < tf_matrix.length; i++) {
             for (int j = 0; j < tf_matrix[0].length; j++) {
@@ -64,11 +76,27 @@ public class Rocchio {
 
             }
             text += "\n";
-            System.out.println("analizzato " + i + " di 200");
+            if (print) {
+                System.out.println("scritto " + i + " di 200");
+            }
         }
         try {
-            Files.write(Paths.get("tfmatrix.txt"), text.getBytes());
-            System.out.println("scrittura terminata");
+            String ext = "";
+            if (npos) {
+                ext += "_npos";
+            } else {
+                ext += "_nonpos";
+            }
+
+            if (babel) {
+                ext += "_babel";
+            } else {
+                ext += "_nobabel";
+            }
+            Files.write(Paths.get("tfmatrix" + ext + ".txt"), text.getBytes());
+            if (print) {
+                System.out.println("scrittura terminata");
+            }
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -88,14 +116,16 @@ public class Rocchio {
             }
             product /= Math.sqrt(norma_2 * norma_1);
         } else {
-            System.out
-                    .println("I due vettori non sono della stessa dimensione");
+            if (print) {
+                System.out
+                        .println("I due vettori non sono della stessa dimensione");
+            }
         }
         return product;
 
     }
 
-    public void calcolaCentroidi(String types[], double[][] tf_matrix) {
+    public void calcolaCentroidi(String types[]) {
 
         int beta = 16;
         int gamma = 4;
@@ -109,7 +139,9 @@ public class Rocchio {
                     centroids[i][k] += beta * tf_matrix[j][k] / 20;
                 }
             }
-            System.out.print("centroide num " + i + " ");
+            if (print) {
+                System.out.print("centroide num " + i + " ");
+            }
             for (int j = 0; j < i * 20; j++) {
                 double sim = 0;
                 if (npos) {
@@ -118,7 +150,9 @@ public class Rocchio {
 
                 for (int k = 0; k < parole.length; k++) {
                     if (npos) {
-                        System.out.print(sim + " : ");
+                        if (print) {
+                            System.out.print(sim + " : ");
+                        }
 
                         if (sim > 0.8) {
                             centroids[i][k] -= gamma * tf_matrix[j][k] / 180;
@@ -143,7 +177,9 @@ public class Rocchio {
                 }
 
             }
-            System.out.println();
+            if (print) {
+                System.out.println();
+            }
 
             for (int k = 0; k < parole.length; k++) {
                 text += centroids[i][k] + (k != parole.length - 1 ? "," : "");
@@ -160,17 +196,23 @@ public class Rocchio {
             String ext = "";
             if (npos) {
                 ext += "_npos";
+            } else {
+                ext += "_nonpos";
             }
 
             if (babel) {
                 ext += "_babel";
+            } else {
+                ext += "_nobabel";
             }
 
             Files.write(Paths.get("dizionario" + ext + ".txt"), par.getBytes());
             Files.write(Paths.get("centroids" + ext + ".txt"), text.getBytes());
+
         } catch (IOException ex) {
-            Logger.getLogger(Main_1_2.class.getName()).log(Level.SEVERE, null,
-                    ex);
+            Logger.getLogger(Main_1_2.class
+                    .getName()).log(Level.SEVERE, null,
+                            ex);
         }
     }
 
@@ -180,7 +222,19 @@ public class Rocchio {
     public double[][] leggiTFMatrice() {
         double[][] tf_matrice;
         try {
-            List<String> linee = Files.readAllLines(Paths.get("centroids.txt"),
+            String ext = "";
+            if (npos) {
+                ext += "_npos";
+            } else {
+                ext += "_nonpos";
+            }
+
+            if (babel) {
+                ext += "_babel";
+            } else {
+                ext += "_nobabel";
+            }
+            List<String> linee = Files.readAllLines(Paths.get("centroids" + ext + ".txt"),
                     Charset.defaultCharset());
             int num_classi = linee.size();
             String[] riga = linee.get(0).split(",");
@@ -194,7 +248,7 @@ public class Rocchio {
             }
 
             ArrayList<String> linee_diz = (ArrayList<String>) Files
-                    .readAllLines(Paths.get("dizionario.txt"),
+                    .readAllLines(Paths.get("dizionario" + ext + ".txt"),
                             Charset.defaultCharset());
             for (String linea : linee_diz) {
                 int[] x = new int[1];
@@ -202,8 +256,10 @@ public class Rocchio {
                 dict.addToDizionario(linea, x);
             }
             return tf_matrice;
+
         } catch (IOException ex) {
-            Logger.getLogger(Main_3.class.getName())
+            Logger.getLogger(Main_3.class
+                    .getName())
                     .log(Level.SEVERE, null, ex);
         }
         return null;
@@ -211,8 +267,8 @@ public class Rocchio {
 
     public double[] calcolaTFVettore(String path) {
         double[] tf_vettore;
-        dict.generaDizionarioDaPathFile(path);
-        String[] parole = dict.getDizionario();
+        dict.generaDizionarioFilePathIT(path);
+        parole = dict.getDizionario();
 
         tf_vettore = new double[parole.length];
         for (int j = 0; j < tf_vettore.length; j++) {
