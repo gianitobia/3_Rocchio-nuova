@@ -1,36 +1,32 @@
 
 public class Main_1_2 {
 
-    // classe contenente il metodo rocchio
-    static Rocchio rocchio;
-    // abilita o no la variante con il calcolo dei near positive invece dei neg
-    static boolean npos;
-    // abilita o no la variante con l'utilizzo dei babelnet id invece che i
-    // lemmi
-    static boolean babel;
-
+//    // classe contenente il metodo rocchio
+//    static Rocchio rocchio;
+//    // abilita o no la variante con il calcolo dei near positive invece dei neg
+//    static boolean npos;
+//    // abilita o no la variante con l'utilizzo dei babelnet id invece che i
+//    // lemmi
+//    static boolean babel;
     public static void main(String args[]) {
-        npos = false;
-        babel = true;
-        String[] types = {"ambiente", "cinema", "cucina", "economia_finanza",
-            "motori", "politica", "salute", "scie_tecnologia",
-            "spettacoli", "sport"};
-        // genero dizionario leggendo i 200 file e passandoli al tokenizer il
-        // quale può
-        // - o tokenizzarli e lemmatizzarli usando morph_it
-        // per far ciò prima il testo viene suddiviso in linee e poi ogni linea
-        // viene tokenizzata, e poi ogni parola trovata viene confrontata con le
-        // info date da morph-it per lemmatizzarla
-        // - o li tokenizza, li lemmatizza e poi li riduce ai babelid usando
-        // babelnet
-        rocchio = new Rocchio(npos, babel, types, Dizionario.Lang.IT);
-        System.out.println("leggo tutti i documenti e genero il dizionario");
+        boolean print = false;
 
-        double[][] tf_matrix = rocchio.calcolaTFMatrix();
-        System.out.println("genero la tf_matrix");
-        rocchio.writeTFMatrix(tf_matrix);
-        System.out.println("termino la scrittura della tf_matrix");
-        rocchio.calcolaCentroidi(types, tf_matrix);
+        RocchioLauncher rl1 = new RocchioLauncher(false, false, print);
+        Thread t = new Thread(rl1);
+        t.start();
+
+        RocchioLauncher rl2 = new RocchioLauncher(false, true, print);
+        Thread t2 = new Thread(rl2);
+        t2.start();
+
+        RocchioLauncher rl3 = new RocchioLauncher(true, false, print);
+        Thread t3 = new Thread(rl3);
+        t3.start();
+
+        RocchioLauncher rl4 = new RocchioLauncher(true, true, print);
+        Thread t4 = new Thread(rl4);
+        t4.start();
+
     }
 
 }
