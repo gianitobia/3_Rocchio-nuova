@@ -21,18 +21,21 @@ public class Dizionario {
     // piuttosto che
     // lemmi
     static private boolean babel;
+    boolean print;
 
-    public Dizionario(boolean flag, Lang language) {
+    public Dizionario(boolean flag, Lang language, boolean print) {
         babel = flag;
         dizionario = new HashMap<>();
         if (language == Lang.IT) {
-            tokenizerIT = new Tokenizer_IT(babel);
+            tokenizerIT = new Tokenizer_IT(babel, print);
         } else {
-            tokenizerEN = new Tokenizer_EN();
+            tokenizerEN = new Tokenizer_EN(print);
         }
+        this.print = print;
+
     }
 
-    public void generaDizionarioEN(String path) {
+    public void generaDizionarioFilePathEN(String path) {
         try {
             ArrayList<String> lines = (ArrayList<String>) Files.readAllLines(
                     Paths.get(path), Charset.forName("CP850"));
@@ -49,19 +52,54 @@ public class Dizionario {
                             int[] x = new int[1];
                             x[0] = 1;
                             dizionario.put(token, x);
+                            if (print) {
+                                System.out
+                                        .println("Aggiunta una parola al dizionario quindi non saranno validi i calcoli");
+                            }
                         }
                     }
                 }
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
 
-    public void generaDizionario(String[] types) {
+    public void generaDizionarioFilePathIT(String path) {
+        try {
+            ArrayList<String> linee = (ArrayList<String>) Files.readAllLines(
+                    Paths.get(path), Charset.defaultCharset());
+            ArrayList<ArrayList<String>> testiAnalizzati = tokenizerIT
+                    .analizzaListaTesti(linee);
+            for (ArrayList<String> lineaAnalizzata : testiAnalizzati) {
+                for (String token : lineaAnalizzata) {
+                    if (!"".equals(token)) {
+                        if (dizionario.containsKey(token)) {
+                            int[] occ = dizionario.get(token);
+                            occ[0]++;
+                            dizionario.put(token, occ);
+                        } else {
+                            int[] x = new int[1];
+                            x[0] = 1;
+                            dizionario.put(token, x);
+                            if (print) {
+                                System.out
+                                        .println("Aggiunta una parola al dizionario quindi non saranno validi i calcoli");
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void generaDizionarioDaListaType(String[] types) {
         int index = 0;
-        for (String type : types) {
+
+        for (final String type : types) {
+
             for (int i = 1; i <= 20; i++) {
                 try {
                     ArrayList<String> linee = (ArrayList<String>) Files
@@ -97,34 +135,6 @@ public class Dizionario {
         }
     }
 
-    public void generaDizionarioDaPathFile(String path) {
-        try {
-            ArrayList<String> linee = (ArrayList<String>) Files.readAllLines(
-                    Paths.get(path), Charset.defaultCharset());
-            ArrayList<ArrayList<String>> testiAnalizzati = tokenizerIT
-                    .analizzaListaTesti(linee);
-            for (ArrayList<String> lineaAnalizzata : testiAnalizzati) {
-                for (String token : lineaAnalizzata) {
-                    if (!"".equals(token)) {
-                        if (dizionario.containsKey(token)) {
-                            int[] occ = dizionario.get(token);
-                            occ[0]++;
-                            dizionario.put(token, occ);
-                        } else {
-                            int[] x = new int[1];
-                            x[0] = 1;
-                            dizionario.put(token, x);
-                            System.out
-                                    .println("Aggiunta una parola al dizionario quindi non saranno validi i calcoli");
-                        }
-                    }
-                }
-            }
-        } catch (IOException ex) {
-            System.out.println(ex);
-        }
-    }
-
     // restituisce il dizionario in un array di stringhe
     public String[] getDizionario() {
         return dizionario.keySet().toArray(
@@ -139,5 +149,4 @@ public class Dizionario {
     public int[] getOccorrenze(String parola) {
         return dizionario.get(parola);
     }
-
 }
