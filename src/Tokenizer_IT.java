@@ -24,54 +24,79 @@ import java.util.logging.Logger;
  */
 public class Tokenizer_IT {
 
-    static Set<String> stopWords;
-    static HashMap<String, String> lemmi;
-    static BabelNet bn;
-    static List<BabelSynset> synsets;
-    static boolean babel;
+    Set<String> stopWords;
+    HashMap<String, String> lemmi;
+    BabelNet bn;
+    boolean babel;
+    boolean print;
 
     // costruttore con scelta, booleana, per effettuare la tokenizzazione in
     // babelnet
-    public Tokenizer_IT(boolean flag) {
+    public Tokenizer_IT(boolean flag, boolean print) {
         babel = flag;
         if (babel) {
             BabelNetConfiguration conf = BabelNetConfiguration.getInstance();
             conf.setConfigurationFile(new File(
                     "config/babelnet.properties"));
             bn = BabelNet.getInstance();
+        } else {
+            lemmi = getLemmi();
+
         }
         stopWords = getStopWords();
-        lemmi = getLemmi();
-//        ArrayList<String> lista_parole = new ArrayList<>();
-//        ArrayList<ArrayList<String>> lista_parole_noStopword = new ArrayList<>();
-//        lista_parole_noStopword = removeStopwordsFromList(lista_parole);
-//        lista_parole_noStopword = getLemsFromContexts(lista_parole_noStopword);
-//         for(int i = 0; i < lista_parole_noStopword.size(); i++){
-//            System.out.println(lista_parole_noStopword);
-//        }
-
+        this.print = print;
     }
 
-    // tokenizza una singola stringa di parole
-    public ArrayList<String> analizzaTesto(String testo) {
-        ArrayList<String> parole;
-        ArrayList<String> parole_da_lem = tokenizeString(testo);
-        if (parole_da_lem.size() > 0) {
-            if (babel) {
-                // versione con lemmi
-                ArrayList<String> parole_lemmatizzate = lemmatizza(parole_da_lem);
-                parole = getBabelNetID(parole_lemmatizzate);
-                System.out.println(parole);
-                // versione senza lemmi
-                // parole = getBabelNetID(parole_lemmatizzate);
-            } else {
-                parole = lemmatizza(parole_da_lem);
-            }
-        } else {
-            parole = null;
-        }
-        return parole;
+    // popola l'hashset di stopwords leggendo le stopwords da file
+    private Set<String> getStopWords() {
 
+        stopWords = new LinkedHashSet<>();
+
+        try {
+            String line;
+            BufferedReader br = new BufferedReader(new FileReader(
+                    "src/stopwords.txt"));
+            while ((line = br.readLine()) != null) {
+                if (!line.contains("|") && !line.equals("")) {
+                    stopWords.add(line);
+                }
+            }
+            br.close();
+
+            br = new BufferedReader(new FileReader("resources/jlt/stopwords/stopwords_it.txt"));
+            while ((line = br.readLine()) != null) {
+                stopWords.add(line);
+            }
+            br.close();
+
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return stopWords;
+    }
+
+    private HashMap<String, String> getLemmi() {
+        lemmi = new HashMap<>();
+
+        try {
+            String line;
+            BufferedReader br = new BufferedReader(new FileReader(
+                    "src/morphit/morph-it_048.txt"));
+            while ((line = br.readLine()) != null) {
+                if (line.indexOf("|") < 0 && !line.equals("")) {
+                    String[] row = line.split("[\\s]+");
+                    lemmi.put(row[0], row[1]);
+                }
+            }
+            br.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return lemmi;
     }
 
     // tokenizza un ArrayList contenente stringhe di parole
@@ -86,6 +111,52 @@ public class Tokenizer_IT {
             }
         }
         return lista_parole;
+    }
+
+    // tokenizza una singola stringa di parole
+    public ArrayList<String> analizzaTesto(String testo) {
+        ArrayList<String> parole;
+        ArrayList<String> parole_da_lem = tokenizeString(testo);
+        if (parole_da_lem.size() > 0) {
+            if (babel) {
+                parole = getBabelNetID(parole_da_lem);
+                if (print) {
+                    System.out.println(parole);
+                }
+            } else {
+                parole = lemmatizza(parole_da_lem);
+            }
+        } else {
+            parole = null;
+        }
+        return parole;
+
+    }
+
+    // lemmatizzazione di una stringa
+    private ArrayList<String> lemmatizza(ArrayList<String> parole_da_lem) {
+        ArrayList<String> parole = new ArrayList<>();
+        for (String parola_da_lem : parole_da_lem) {
+            String lemma = lemmi.get(parola_da_lem.toLowerCase());
+            if (lemma != null) {
+                parole.add(lemma);
+            } else {
+                parole.add(parola_da_lem);
+            }
+        }
+        return parole;
+    }
+
+    // Tokenizzazione di una parola rimuovendone le stopwords
+    private ArrayList<String> tokenizeString(String stringa) {
+        ArrayList<String> tokens = new ArrayList<>();
+        String[] parole = stringa.toLowerCase().split("[\\W]");
+        for (String parola : parole) {
+            if (!stopWords.contains(parola.toLowerCase()) && !parola.equals("")) {
+                tokens.add(parola);
+            }
+        }
+        return tokens;
     }
 
     private ArrayList<String> getBabelNetID(ArrayList<String> parole_da_lem) {
@@ -117,14 +188,11 @@ public class Tokenizer_IT {
             if (context.size() > 0) {
                 synset = getSynsetFromSmallContext(parola, context);
                 if (synset != null) {
-                    parole.add(synset.getId().toString());
+                    parole.add(synset.getId());
                 } else {
                     parole.add(parola);
-                    System.out.println("\t# " + parola);
                 }
             } else {
-                // TODO Auto-generated catch block
-
                 List<BabelSynset> list_synset = new ArrayList<>();
                 try {
                     list_synset = bn.getSynsets(Language.IT,
@@ -134,10 +202,9 @@ public class Tokenizer_IT {
                 }
                 if (list_synset.size() > 0) {
                     synset = list_synset.get(0);
-                    parole.add(synset.getId().toString());
+                    parole.add(synset.getId());
                 } else {
                     parole.add(parola);
-                    System.out.println("\t# " + parola);
                 }
             }
         }
@@ -145,10 +212,7 @@ public class Tokenizer_IT {
         return parole;
     }
 
-    private BabelSynset getSynsetFromSmallContext(String parola,
-            List<String> context) {
-        // TODO Auto-generated catch block
-
+    private BabelSynset getSynsetFromSmallContext(String parola, List<String> context) {
         List<BabelSynset> synsets = new ArrayList<>();
         try {
             synsets = bn.getSynsets(Language.IT, parola);
@@ -167,7 +231,7 @@ public class Tokenizer_IT {
             for (BabelGloss glossa : glosse) {
                 overlap += computeOverlap(context, glossa.getGloss());
             }
-            if (o < overlap) {
+            if (o < overlap / glosse.size()) {
                 index = synsets.indexOf(synset);
             }
         }
@@ -187,114 +251,18 @@ public class Tokenizer_IT {
             if (context.contains(parola)) {
                 overlap++;
             }
-//             System.out.println(parola +"' thanks to an overlap equals"
-//                    + " to " + overlap);
         }
         return overlap;
     }
 
-    // lemmatizzazione di una stringa
-    private ArrayList<String> lemmatizza(ArrayList<String> parole_da_lem) {
-        ArrayList<String> parole = new ArrayList<>();
-        for (int i = 0; i < parole_da_lem.size(); i++) {
-            String lemma = lemmi.get(parole_da_lem.get(i));
-//            if (lemmi.containsKey(parola.toLowerCase())) {
-//                parole.add(lemmi.get(parola.toLowerCase()));
-//            } else {
-//                parole.add(parola.toLowerCase());
-//            }
-            if (lemma != null) {
-                parole.add(lemma);
-            } else {
-                parole.add(parole_da_lem.get(i));
-            }
-        }
-        return parole;
-    }
-
-    // Tokenizzazione di una parola rimuovendone le stopwords
-    private ArrayList<String> tokenizeString(String stringa) {
-        ArrayList<String> tokens = new ArrayList<>();
-        String[] parole = stringa.split("[\\W]");
-        for (String parola : parole) {
-            if (!stopWords.contains(parola.toLowerCase()) && !parola.equals("")) {
-                tokens.add(parola);
-            }
-        }
-        return tokens;
-    }
-
-    // tokenizzazione di un ArrayList di stringhe rimuovendone le stopwords
-//	private ArrayList<ArrayList<String>> tokenizeListStrings(
-//			ArrayList<String> lista_stringhe) {
-//		ArrayList<ArrayList<String>> lista_stringhe_tokenizzate = new ArrayList<ArrayList<String>>();
-//		for (String stringa : lista_stringhe) {
-//			ArrayList<String> stringa_tokenizzata = tokenizeString(stringa);
-//			lista_stringhe_tokenizzate.add(stringa_tokenizzata);
-//		}
-//		return lista_stringhe_tokenizzate;
-//	}
-    private static HashMap<String, String> getLemmi() {
-        lemmi = new HashMap<>();
-
-        try {
-            String line;
-            BufferedReader br = new BufferedReader(new FileReader(
-                    "src/morphit/morph-it_048.txt"));
-            while ((line = br.readLine()) != null) {
-                if (line.indexOf("|") < 0 && !line.equals("")) {
-                    String[] row = line.split("[\\s]+");
-                    lemmi.put(row[0], row[1]);
-                }
-            }
-            br.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return lemmi;
-    }
-
-    // popola l'hashset di stopwords leggendo le stopwords da file
-    private static Set<String> getStopWords() {
-
-        stopWords = new LinkedHashSet<>();
-
-        try {
-            String line;
-            BufferedReader br = new BufferedReader(new FileReader(
-                    "src/stopwords.txt"));
-            while ((line = br.readLine()) != null) {
-                if (!line.contains("|") && !line.equals("")) {
-                    stopWords.add(line);
-                }
-            }
-            br.close();
-
-            br = new BufferedReader(new FileReader("resources/jlt/stopwords/stopwords_it.txt"));
-            while ((line = br.readLine()) != null) {
-                stopWords.add(line);
-            }
-            br.close();
-
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return stopWords;
-    }
-
-    public static ArrayList<String> removeStopwordsFromContexts(String frase) {
+    public ArrayList<String> removeStopwordsFromContexts(String frase) {
         ArrayList<String> array_tokens = new ArrayList<>();
-        Set<String> stopwords = getStopWords();
         String[] words = frase.split("[\\s]+");
         for (String word : words) {
             String clean_word = word.replaceAll("[ \\p{Punct}]", " ");
             String[] tokens = clean_word.split("[\\s]+");
             for (String token : tokens) {
-                if (!stopwords.contains(token.toLowerCase())) {
+                if (!stopWords.contains(token.toLowerCase())) {
                     array_tokens.add(token);
                 }
             }
@@ -302,7 +270,7 @@ public class Tokenizer_IT {
         return array_tokens;
     }
 
-    public static ArrayList<ArrayList<String>> removeStopwordsFromList(ArrayList<String> lista) {
+    public ArrayList<ArrayList<String>> removeStopwordsFromList(ArrayList<String> lista) {
         ArrayList<ArrayList<String>> lista_stopwords_rimosse = new ArrayList<>();
         for (String word : lista) {
             lista_stopwords_rimosse.add(removeStopwordsFromContexts(word));
@@ -310,7 +278,7 @@ public class Tokenizer_IT {
         return lista_stopwords_rimosse;
     }
 
-    public static ArrayList<ArrayList<String>> getLemsFromContexts(ArrayList<ArrayList<String>> lems) {
+    public ArrayList<ArrayList<String>> getLemsFromContexts(ArrayList<ArrayList<String>> lems) {
         ArrayList<ArrayList<String>> lista_lemmi_contesti = new ArrayList<>();
 
         for (int i = 0; i < lems.size(); i++) {

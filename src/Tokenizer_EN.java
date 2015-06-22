@@ -17,20 +17,23 @@ import java.util.Set;
 
 public class Tokenizer_EN {
 
-    static StanfordCoreNLP pipeline;
-    static Set<String> stopWords;
+    StanfordCoreNLP pipeline;
+    Set<String> stopWords;
+    boolean print;
 
-    public Tokenizer_EN() {
-        stopWords = new HashSet<>();
+    public Tokenizer_EN(boolean print) {
         Properties props = new Properties();
         props.put("annotators", "tokenize, ssplit, pos, lemma");
         pipeline = new StanfordCoreNLP(props);
         // ognuno deve settare il proprio path
-        System.setProperty("wordnet.database.dir", "/usr/local/WordNet-3.0/dict/");
+        System.setProperty("wordnet.database.dir", "/usr/local/Cellar/wordnet-3.0/dict/");
         getStopWords();
+        this.print = print;
     }
 
-    private static void getStopWords() {
+    private void getStopWords() {
+        stopWords = new HashSet<>();
+
         try {
             BufferedReader br = new BufferedReader(new FileReader("src/stop_words_FULL.txt"));
             String word;
@@ -85,11 +88,11 @@ public class Tokenizer_EN {
     }
 
     private String tokenizeString(String testo) {
-        String[] splitted = testo.toLowerCase().split("[\\W]");
+        String[] parole = testo.toLowerCase().split("[\\W]");
         testo = "";
-        for (String s : splitted) {
-            if (stopWords.contains(s) != true) {
-                testo += s + " ";
+        for (String parola : parole) {
+            if (!stopWords.contains(parola)) {
+                testo += parola + " ";
             }
         }
         return testo;
