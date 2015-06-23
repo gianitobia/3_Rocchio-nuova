@@ -1,4 +1,8 @@
 
+/**
+ *
+ * @author Tobia Giani, Salvo Cirinà
+ */
 public class Main_1_2 {
 
 //    // classe contenente il metodo rocchio

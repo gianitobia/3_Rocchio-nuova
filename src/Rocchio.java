@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ *
+ * @author Tobia Giani, Salvo Cirinà
+ */
 public class Rocchio {
 
     Dizionario dict;
@@ -20,6 +24,7 @@ public class Rocchio {
     boolean babel;
     boolean print;
     double[][] tf_matrix;
+    double[][] centroids;
 
     /*
      * parte relativa al main_1_2
@@ -132,7 +137,7 @@ public class Rocchio {
 
         int beta = 16;
         int gamma = 4;
-        double[][] centroids = new double[types.length][parole.length];
+        centroids = new double[types.length][parole.length];
         String text = "";
         for (int i = 0; i < types.length; i++) {
             double[] vettore_centr = new double[parole.length];
@@ -153,10 +158,6 @@ public class Rocchio {
 
                 for (int k = 0; k < parole.length; k++) {
                     if (npos) {
-                        if (print) {
-                            System.out.print(sim + " : ");
-                        }
-
                         if (sim > 0.8) {
                             centroids[i][k] -= gamma * tf_matrix[j][k] / 180;
                         }
@@ -179,9 +180,6 @@ public class Rocchio {
                     }
                 }
 
-            }
-            if (print) {
-                System.out.println();
             }
 
             for (int k = 0; k < parole.length; k++) {
@@ -221,8 +219,7 @@ public class Rocchio {
     /*
      * parte relativa al main_3
      */
-    public double[][] leggiTFMatrice() {
-        double[][] tf_matrice;
+    public void leggiTFMatrice() {
         try {
             String ext = "";
             if (npos) {
@@ -241,11 +238,11 @@ public class Rocchio {
             int num_classi = linee.size();
             String[] riga = linee.get(0).split(",");
             int num_parole = riga.length;
-            tf_matrice = new double[num_classi][num_parole];
+            centroids = new double[num_classi][num_parole];
             for (int i = 0; i < num_classi; i++) {
                 riga = linee.get(i).split(",");
                 for (int j = 0; j < num_parole; j++) {
-                    tf_matrice[i][j] = Double.parseDouble(riga[j]);
+                    centroids[i][j] = Double.parseDouble(riga[j]);
                 }
             }
 
@@ -257,14 +254,11 @@ public class Rocchio {
                 x[0] = 0;
                 dict.addToDizionario(linea, x);
             }
-            return tf_matrice;
-
         } catch (IOException ex) {
             Logger.getLogger(Main_3.class
                     .getName())
                     .log(Level.SEVERE, null, ex);
         }
-        return null;
     }
 
     public double[] calcolaTFVettore(String path) {
@@ -279,37 +273,25 @@ public class Rocchio {
         return tf_vettore;
     }
 
-    public String[] getParolePiuComuni(int index) {
-        boolean passoBase = true;
-        String[] temp = dict.getDizionario();
-        String[] words = new String[3];
-        int[] occorrenze = new int[3];
-        for (String temp1 : temp) {
-            int occorrenza = dict.getOccorrenze(temp1)[index];
-            // passo base
-            if (passoBase) {
-                words[0] = temp1;
-                occorrenze[0] = occorrenza;
-                passoBase = false;
-            }
-            if (occorrenze[0] <= occorrenza) {
-                occorrenze[2] = occorrenze[1];
-                words[2] = words[1];
-                occorrenze[1] = occorrenze[0];
-                words[1] = words[0];
-                occorrenze[0] = occorrenza;
-                words[0] = temp1;
-            } else if (occorrenze[1] <= occorrenza) {
-                occorrenze[2] = occorrenze[1];
-                words[2] = words[1];
-                occorrenze[1] = occorrenza;
-                words[1] = temp1;
-            } else if (occorrenze[2] <= occorrenza) {
-                occorrenze[2] = occorrenza;
-                words[2] = temp1;
+    void calcolaClassePiuSimile(String path) {
+        double[] tf_vettore = calcolaTFVettore(path);
+
+        String[] types = {"ambiente", "cinema", "cucina", "economia_finanza",
+            "motori", "politica", "salute", "scie_tecnologia",
+            "spettacoli", "sport"};
+
+        double largest = 0, sim;
+        int index = 0;
+        for (int i = 0; i < centroids.length; i++) {
+            sim = calcolaCosSimilarity(centroids[i], tf_vettore);
+            if (sim > largest) {
+                largest = sim;
+                index = i;
             }
         }
-        return words;
+
+        System.out.println("L'articolo fa parte della classe " + types[index]
+                + " con similarita' pari a " + largest);
     }
 
 }

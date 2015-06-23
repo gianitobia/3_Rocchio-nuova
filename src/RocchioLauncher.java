@@ -1,4 +1,8 @@
 
+/**
+ *
+ * @author Tobia Giani, Salvo Cirinà
+ */
 class RocchioLauncher implements Runnable {
 
     // classe contenente il metodo rocchio
@@ -13,6 +17,7 @@ class RocchioLauncher implements Runnable {
     public RocchioLauncher(boolean babel, boolean npos, boolean print) {
         this.babel = babel;
         this.npos = npos;
+        this.print = print;
     }
 
     @Override
