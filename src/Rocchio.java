@@ -51,19 +51,23 @@ public class Rocchio {
         parole = dict.getDizionario();
         tf_matrix = new double[200][parole.length];
 
-        for (int i = 0; i < tf_matrix.length; i++) {
-            for (int j = 0; j < tf_matrix[0].length; j++) {
-                int[] docs = dict.getOccorrenze(parole[j]);
-                double count = 0;
-                if (docs != null) {
-                    for (int doc : docs) {
-                        if (doc != 0) {
-                            count++;
-                        }
-                    }
+        for (int j = 0; j < parole.length; j++) {
+            int[] docs = dict.getOccorrenze(parole[j]);
+            double count = 0;
+            for (int doc : docs) {
+                if (doc != 0) {
+                    count++;
                 }
-                tf_matrix[i][j] = ((double) docs[i]) * Math.log(200 / count);
             }
+
+            for (int i = 0; i < tf_matrix.length; i++) {
+                if (count > 0) {
+                    tf_matrix[i][j] = ((double) docs[i]) * Math.log(200 / count);
+                } else {
+                    tf_matrix[i][j] = 0;
+                }
+            }
+
         }
     }
 
@@ -72,10 +76,10 @@ public class Rocchio {
         for (int i = 0; i < tf_matrix.length; i++) {
             for (int j = 0; j < tf_matrix[0].length; j++) {
                 text += tf_matrix[i][j]
-                        + (j != tf_matrix[0].length - 1 ? "," : "");
+                        + (j != tf_matrix[0].length - 1 ? "," : "\n");
 
             }
-            text += "\n";
+
             if (print) {
                 System.out.println("scritto " + i + " di 200");
             }
@@ -114,11 +118,10 @@ public class Rocchio {
                 norma_1 += array1[i] * array1[i];
                 product += array1[i] * array2[i];
             }
-            product /= Math.sqrt(norma_2 * norma_1);
+            product /= Math.sqrt(norma_2) * Math.sqrt(norma_1);
         } else {
             if (print) {
-                System.out
-                        .println("I due vettori non sono della stessa dimensione");
+                System.out.println("I due vettori non sono della stessa dimensione");
             }
         }
         return product;
@@ -182,9 +185,8 @@ public class Rocchio {
             }
 
             for (int k = 0; k < parole.length; k++) {
-                text += centroids[i][k] + (k != parole.length - 1 ? "," : "");
+                text += centroids[i][k] + (k != parole.length - 1 ? "," : "\n");
             }
-            text += "\n";
         }
 
         String par = "";
