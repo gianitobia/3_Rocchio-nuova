@@ -13,7 +13,7 @@ public class Main_1_2 {
 //    // lemmi
 //    static boolean babel;
     public static void main(String args[]) {
-        boolean print = false;
+        boolean print = true;
 
         RocchioLauncher rl1 = new RocchioLauncher(false, false, print);
         Thread t = new Thread(rl1);

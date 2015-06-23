@@ -22,9 +22,9 @@ class RocchioLauncher implements Runnable {
 
     @Override
     public void run() {
-        final String[] types = {"ambiente", "cinema", "cucina", "economia_finanza",
-            "motori", "politica", "salute", "scie_tecnologia",
-            "spettacoli", "sport"};
+        final String[] types = {"ambiente"};//, "cinema", "cucina", "economia_finanza",
+        //"motori", "politica", "salute", "scie_tecnologia",
+        //"spettacoli", "sport"};
         rocchio = new Rocchio(npos, babel, types, Dizionario.Lang.IT, print);
         if (print) {
             System.out.println("leggo tutti i documenti e genero il dizionario");
@@ -32,13 +32,16 @@ class RocchioLauncher implements Runnable {
 
         rocchio.calcolaTFMatrix();
         if (print) {
-            System.out.println("genero la tf_matrix");
+            System.out.println("generata la tf_matrix");
         }
         rocchio.writeTFMatrix();
         if (print) {
-            System.out.println("termino la scrittura della tf_matrix");
+            System.out.println("terminato la scrittura della tf_matrix");
         }
         rocchio.calcolaCentroidi(types);
+        if (print) {
+            System.out.println("terminato il calcolo e la scrittura dei centroidi e del dizionario");
+        }
     }
 
 }

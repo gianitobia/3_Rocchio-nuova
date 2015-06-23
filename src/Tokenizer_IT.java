@@ -39,10 +39,8 @@ public class Tokenizer_IT {
             conf.setConfigurationFile(new File(
                     "config/babelnet.properties"));
             bn = BabelNet.getInstance();
-        } else {
-            lemmi = getLemmi();
-
         }
+        lemmi = getLemmi();
         stopWords = getStopWords();
         this.print = print;
     }
@@ -119,10 +117,7 @@ public class Tokenizer_IT {
         ArrayList<String> parole_da_lem = tokenizeString(testo);
         if (parole_da_lem.size() > 0) {
             if (babel) {
-                parole = getBabelNetID(parole_da_lem);
-                if (print) {
-                    System.out.println(parole);
-                }
+                parole = getBabelNetID(lemmatizza(parole_da_lem));
             } else {
                 parole = lemmatizza(parole_da_lem);
             }
@@ -231,8 +226,10 @@ public class Tokenizer_IT {
             for (BabelGloss glossa : glosse) {
                 overlap += computeOverlap(context, glossa.getGloss());
             }
-            if (o < overlap / glosse.size()) {
-                index = synsets.indexOf(synset);
+            if (glosse.size() > 0) {
+                if (o < overlap / glosse.size()) {
+                    index = synsets.indexOf(synset);
+                }
             }
         }
         if (index == -1) {

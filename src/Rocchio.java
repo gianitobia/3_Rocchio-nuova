@@ -15,6 +15,9 @@ import java.util.logging.Logger;
 public class Rocchio {
 
     Dizionario dict;
+
+    Dizionario dict3;
+
     // array contenente tutte le parole incontrate nei 200 documenti
     String[] parole;
     // abilita o no la variante con il calcolo dei near positive invece dei neg
@@ -35,6 +38,8 @@ public class Rocchio {
         babel = babel_flag;
         dict = new Dizionario(babel, language, print);
         dict.generaDizionarioDaListaType(classi);
+        parole = dict.getDizionario();
+        dict3 = new Dizionario(babel, language, print);
         this.print = print;
     }
 
@@ -45,7 +50,7 @@ public class Rocchio {
             Dizionario.Lang language, boolean print) {
         npos = npos_flag;
         babel = babel_flag;
-        dict = new Dizionario(babel, language, print);
+        dict3 = new Dizionario(babel, language, print);
         this.print = print;
     }
 
@@ -53,15 +58,16 @@ public class Rocchio {
      * parte relativa al main_1_2
      */
     public void calcolaTFMatrix() {
-        parole = dict.getDizionario();
         tf_matrix = new double[200][parole.length];
 
         for (int j = 0; j < parole.length; j++) {
             int[] docs = dict.getOccorrenze(parole[j]);
             double count = 0;
-            for (int doc : docs) {
-                if (doc != 0) {
-                    count++;
+            if (docs != null) {
+                for (int doc : docs) {
+                    if (doc != 0) {
+                        count++;
+                    }
                 }
             }
 
@@ -103,9 +109,6 @@ public class Rocchio {
                 ext += "_nobabel";
             }
             Files.write(Paths.get("tfmatrix" + ext + ".txt"), text.getBytes());
-            if (print) {
-                System.out.println("scrittura terminata");
-            }
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -147,9 +150,7 @@ public class Rocchio {
                     centroids[i][k] += beta * tf_matrix[j][k] / 20;
                 }
             }
-            if (print) {
-                System.out.print("centroide num " + i + " ");
-            }
+
             for (int j = 0; j < i * 20; j++) {
                 double sim = 0;
                 if (npos) {
@@ -182,38 +183,40 @@ public class Rocchio {
 
             }
 
-            for (int k = 0; k < parole.length; k++) {
-                text += centroids[i][k] + (k != parole.length - 1 ? "," : "\n");
+//            for (int k = 0; k < parole.length; k++) {
+//                text += centroids[i][k] + (k != parole.length - 1 ? "," : "\n");
+//            }
+            if (print) {
+                System.out.println("centroide num " + i + " ");
             }
         }
 
-        String par = "";
-        for (String p : parole) {
-            par += p + "\n";
-        }
-
-        try {
-            String ext = "";
-            if (npos) {
-                ext += "_npos";
-            } else {
-                ext += "_nonpos";
-            }
-
-            if (babel) {
-                ext += "_babel";
-            } else {
-                ext += "_nobabel";
-            }
-
-            Files.write(Paths.get("dizionario" + ext + ".txt"), par.getBytes());
-            Files.write(Paths.get("centroids" + ext + ".txt"), text.getBytes());
-
-        } catch (IOException ex) {
-            Logger.getLogger(Main_1_2.class
-                    .getName()).log(Level.SEVERE, null,
-                            ex);
-        }
+//        String par = "";
+//        for (String p : parole) {
+//            par += p + "\n";
+//        }
+//        try {
+//            String ext = "";
+//            if (npos) {
+//                ext += "_npos";
+//            } else {
+//                ext += "_nonpos";
+//            }
+//
+//            if (babel) {
+//                ext += "_babel";
+//            } else {
+//                ext += "_nobabel";
+//            }
+//
+//            Files.write(Paths.get("dizionario" + ext + ".txt"), par.getBytes());
+//            Files.write(Paths.get("centroids" + ext + ".txt"), text.getBytes());
+//
+//        } catch (IOException ex) {
+//            Logger.getLogger(Main_1_2.class
+//                    .getName()).log(Level.SEVERE, null,
+//                            ex);
+//        }
     }
 
     /*
@@ -252,7 +255,7 @@ public class Rocchio {
             for (String linea : linee_diz) {
                 int[] x = new int[1];
                 x[0] = 0;
-                dict.addToDizionario(linea, x);
+                dict3.addToDizionario(linea, x);
             }
         } catch (IOException ex) {
             Logger.getLogger(Main_3.class
@@ -263,12 +266,14 @@ public class Rocchio {
 
     public double[] calcolaTFVettore(String path) {
         double[] tf_vettore;
-        dict.generaDizionarioFilePathIT(path);
-        parole = dict.getDizionario();
+        dict3.addToDizionario(parole);
+
+        dict3.generaDizionarioFilePathIT(path);
+        parole = dict3.getDizionario();
 
         tf_vettore = new double[parole.length];
         for (int j = 0; j < tf_vettore.length; j++) {
-            tf_vettore[j] = dict.getOccorrenze(parole[j])[0];
+            tf_vettore[j] = dict3.getOccorrenze(parole[j])[0];
         }
         return tf_vettore;
     }
@@ -291,7 +296,7 @@ public class Rocchio {
         }
 
         System.out.println("L'articolo fa parte della classe " + types[index]
-                + " con similarita' pari a " + largest);
+                + " con similarita' pari a " + largest + " utilizzando " + (npos ? "npos" : "nonpos") + " e " + (babel ? "babel" : "nobabel"));
     }
 
 }

@@ -13,21 +13,21 @@ public class Dizionario {
         EN, IT
     };
 
-    static HashMap<String, int[]> dizionario;
-    static private Tokenizer_IT tokenizerIT;
-    static private Tokenizer_EN tokenizerEN;
+    HashMap<String, int[]> dizionario;
+    private Tokenizer_IT tokenizerIT;
+    private Tokenizer_EN tokenizerEN;
 
     // flag per effettuare la tokenizzazione italiana tramite babelnet id's
     // piuttosto che
     // lemmi
-    static private boolean babel;
+    private boolean babel;
     boolean print;
 
     public Dizionario(boolean flag, Lang language, boolean print) {
         babel = flag;
         dizionario = new HashMap<>();
         if (language == Lang.IT) {
-            tokenizerIT = new Tokenizer_IT(babel, print);
+            tokenizerIT = new Tokenizer_IT(flag, print);
         } else {
             tokenizerEN = new Tokenizer_EN(print);
         }
@@ -84,7 +84,7 @@ public class Dizionario {
                             dizionario.put(token, x);
                             if (print) {
                                 System.out
-                                        .println("Aggiunta una parola al dizionario quindi non saranno validi i calcoli");
+                                        .println("Aggiunta la parola " + token + " al dizionario quindi non saranno validi i calcoli");
                             }
                         }
                     }
@@ -117,6 +117,7 @@ public class Dizionario {
                                 if (dizionario.containsKey(parola)) {
                                     int[] documenti = dizionario.get(parola);
                                     documenti[index]++;
+                                    dizionario.remove(parola);
                                     dizionario.put(parola, documenti);
                                 } else {
                                     int[] documenti = new int[200];
@@ -148,5 +149,11 @@ public class Dizionario {
     // restituisce il numero di occorrenze della parola in ogni documento
     public int[] getOccorrenze(String parola) {
         return dizionario.get(parola);
+    }
+
+    void addToDizionario(String[] parole) {
+        for (String p : parole) {
+            dizionario.put(p, new int[1]);
+        }
     }
 }

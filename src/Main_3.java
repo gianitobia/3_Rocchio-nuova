@@ -6,8 +6,6 @@
 public class Main_3 {
 
     static Rocchio rocchio;
-    // abilita o no la variante con l'utilizzo dei babelnet id invece che i
-    // lemmi
 
     public static void main(String args[]) {
         boolean print = true;
