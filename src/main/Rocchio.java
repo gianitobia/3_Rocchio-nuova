@@ -152,8 +152,10 @@ public class Rocchio {
                     centroids[i][k] += beta * tf_matrix[j][k] / 20;
                 }
             }
-
+            double[] centroideNPos = new double[parole.length];
+            int numeroNPos = 0;
             for (int j = 0; j < i * 20; j++) {
+                
                 double sim = 0;
                 if (npos) {
                     sim = calcolaCosSimilarity(vettore_centr, tf_matrix[j]);
@@ -162,7 +164,9 @@ public class Rocchio {
                 for (int k = 0; k < parole.length; k++) {
                     if (npos) {
                         if (sim > 0.8) {
-                            centroids[i][k] -= gamma * tf_matrix[j][k] / 180;
+                            centroideNPos[k] -= gamma * tf_matrix[j][k];
+                            numeroNPos++;
+                            //centroids[i][k] -= gamma * tf_matrix[j][k] / 180;
                         }
                     } else {
                         centroids[i][k] -= gamma * tf_matrix[j][k] / 180;
@@ -176,13 +180,21 @@ public class Rocchio {
                 for (int k = 0; k < parole.length; k++) {
                     if (npos) {
                         if (sim > 0.8) {
-                            centroids[i][k] -= gamma * tf_matrix[j][k] / 180;
+                            centroideNPos[k] -= gamma * tf_matrix[j][k];
+                            numeroNPos++;
+                           // centroids[i][k] -= gamma * tf_matrix[j][k] / 180;
                         }
                     } else {
                         centroids[i][k] -= gamma * tf_matrix[j][k] / 180;
                     }
                 }
 
+            }
+            
+            for (int k = 0; k < parole.length; k++) {
+                    if (npos) {
+                        centroids[i][k] -= centroideNPos[k] / numeroNPos;    
+                    }
             }
 
 //            for (int k = 0; k < parole.length; k++) {
@@ -271,11 +283,10 @@ public class Rocchio {
         dict3.addToDizionario(parole);
 
         dict3.generaDizionarioFilePathIT(path);
-        parole = dict3.getDizionario();
 
         tf_vettore = new double[parole.length];
-        for (int j = 0; j < tf_vettore.length; j++) {
-            tf_vettore[j] = dict3.getOccorrenze(parole[j])[0];
+        for (int i = 0; i < tf_vettore.length; i++) {
+            tf_vettore[i] = dict3.getOccorrenze(parole[i])[0];
         }
         return tf_vettore;
     }
