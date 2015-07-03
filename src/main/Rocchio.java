@@ -1,3 +1,4 @@
+package main;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -7,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import vecchieclassi.Main_3;
 
 /**
  *
@@ -33,13 +35,13 @@ public class Rocchio {
      * parte relativa al main_1_2
      */
     public Rocchio(boolean npos_flag, boolean babel_flag, String[] classi,
-            Dizionario.Lang language, boolean print) {
+            boolean print) {
         npos = npos_flag;
         babel = babel_flag;
-        dict = new Dizionario(babel, language, print);
+        dict = new Dizionario(babel, print);
         dict.generaDizionarioDaListaType(classi);
         parole = dict.getDizionario();
-        dict3 = new Dizionario(babel, language, print);
+        dict3 = new Dizionario(babel, print);
         this.print = print;
     }
 
@@ -47,10 +49,10 @@ public class Rocchio {
      * parte relativa al main_3
      */
     public Rocchio(boolean npos_flag, boolean babel_flag,
-            Dizionario.Lang language, boolean print) {
+            boolean print) {
         npos = npos_flag;
         babel = babel_flag;
-        dict3 = new Dizionario(babel, language, print);
+        dict3 = new Dizionario(babel, print);
         this.print = print;
     }
 
@@ -278,7 +280,7 @@ public class Rocchio {
         return tf_vettore;
     }
 
-    void calcolaClassePiuSimile(String path) {
+    public void calcolaClassePiuSimile(String path) {
         double[] tf_vettore = calcolaTFVettore(path);
 
         String[] types = {"ambiente", "cinema", "cucina", "economia_finanza",

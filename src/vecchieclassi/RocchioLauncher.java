@@ -1,3 +1,6 @@
+package vecchieclassi;
+
+import main.Rocchio;
 
 /**
  *
@@ -25,7 +28,7 @@ class RocchioLauncher implements Runnable {
         final String[] types = {"ambiente"};//, "cinema", "cucina", "economia_finanza",
         //"motori", "politica", "salute", "scie_tecnologia",
         //"spettacoli", "sport"};
-        rocchio = new Rocchio(npos, babel, types, Dizionario.Lang.IT, print);
+        rocchio = new Rocchio(npos, babel, types, print);
         if (print) {
             System.out.println("leggo tutti i documenti e genero il dizionario");
         }

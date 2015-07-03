@@ -1,3 +1,5 @@
+package main;
+
 
 import it.uniroma1.lcl.babelnet.BabelGloss;
 import it.uniroma1.lcl.babelnet.BabelNet;

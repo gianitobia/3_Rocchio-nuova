@@ -1,3 +1,6 @@
+package vecchieclassi;
+
+import main.Rocchio;
 
 /**
  *
@@ -22,7 +25,7 @@ public class FindClassLauncher implements Runnable {
 
     @Override
     public void run() {
-        rocchio = new Rocchio(npos, babel, Dizionario.Lang.IT, print);
+        rocchio = new Rocchio(npos, babel, print);
         rocchio.leggiTFMatrice();
         String path = "src/docs_200/sport_05.txt";
         rocchio.calcolaClassePiuSimile(path);

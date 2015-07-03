@@ -1,3 +1,4 @@
+package main;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -8,14 +9,8 @@ import java.util.HashMap;
 
 public class Dizionario {
 
-    static public enum Lang {
-
-        EN, IT
-    };
-
     HashMap<String, int[]> dizionario;
     private Tokenizer_IT tokenizerIT;
-    private Tokenizer_EN tokenizerEN;
 
     // flag per effettuare la tokenizzazione italiana tramite babelnet id's
     // piuttosto che
@@ -23,46 +18,12 @@ public class Dizionario {
     private boolean babel;
     boolean print;
 
-    public Dizionario(boolean flag, Lang language, boolean print) {
+    public Dizionario(boolean flag, boolean print) {
         babel = flag;
         dizionario = new HashMap<>();
-        if (language == Lang.IT) {
-            tokenizerIT = new Tokenizer_IT(flag, print);
-        } else {
-            tokenizerEN = new Tokenizer_EN(print);
-        }
+        tokenizerIT = new Tokenizer_IT(flag, print);
         this.print = print;
 
-    }
-
-    public void generaDizionarioFilePathEN(String path) {
-        try {
-            ArrayList<String> lines = (ArrayList<String>) Files.readAllLines(
-                    Paths.get(path), Charset.forName("CP850"));
-            ArrayList<ArrayList<String>> testiAnalizzati = tokenizerEN
-                    .analizzaListaTesti(lines);
-            for (ArrayList<String> lineaAnalizzata : testiAnalizzati) {
-                for (String token : lineaAnalizzata) {
-                    if (!"".equals(token)) {
-                        if (dizionario.containsKey(token)) {
-                            int[] occ = dizionario.get(token);
-                            occ[0]++;
-                            dizionario.put(token, occ);
-                        } else {
-                            int[] x = new int[1];
-                            x[0] = 1;
-                            dizionario.put(token, x);
-                            if (print) {
-                                System.out
-                                        .println("Aggiunta una parola al dizionario quindi non saranno validi i calcoli");
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public void generaDizionarioFilePathIT(String path) {
