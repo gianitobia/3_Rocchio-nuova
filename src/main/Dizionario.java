@@ -7,6 +7,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ *
+ * @author Tobia Giani, Salvo Cirinà
+ */
 public class Dizionario {
 
     HashMap<String, int[]> dizionario;

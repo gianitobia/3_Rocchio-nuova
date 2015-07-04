@@ -153,9 +153,9 @@ public class Rocchio {
                 }
             }
             double[] centroideNPos = new double[parole.length];
-            int numeroNPos = 0;
+            double numeroNPos = 0;
             for (int j = 0; j < i * 20; j++) {
-                
+
                 double sim = 0;
                 if (npos) {
                     sim = calcolaCosSimilarity(vettore_centr, tf_matrix[j]);
@@ -163,10 +163,9 @@ public class Rocchio {
 
                 for (int k = 0; k < parole.length; k++) {
                     if (npos) {
-                        if (sim > 0.8) {
+                        if (sim > 0.05) {
                             centroideNPos[k] -= gamma * tf_matrix[j][k];
                             numeroNPos++;
-                            //centroids[i][k] -= gamma * tf_matrix[j][k] / 180;
                         }
                     } else {
                         centroids[i][k] -= gamma * tf_matrix[j][k] / 180;
@@ -175,14 +174,16 @@ public class Rocchio {
             }
 
             for (int j = (i + 1) * 20; j < 200; j++) {
-                double sim = calcolaCosSimilarity(vettore_centr, tf_matrix[j]);
+                double sim = 0;
+                if (npos) {
+                    sim = calcolaCosSimilarity(vettore_centr, tf_matrix[j]);
+                }
 
                 for (int k = 0; k < parole.length; k++) {
                     if (npos) {
-                        if (sim > 0.8) {
+                        if (sim > 0.05) {
                             centroideNPos[k] -= gamma * tf_matrix[j][k];
                             numeroNPos++;
-                           // centroids[i][k] -= gamma * tf_matrix[j][k] / 180;
                         }
                     } else {
                         centroids[i][k] -= gamma * tf_matrix[j][k] / 180;
@@ -190,47 +191,19 @@ public class Rocchio {
                 }
 
             }
-            
+
             for (int k = 0; k < parole.length; k++) {
-                    if (npos) {
-                        centroids[i][k] -= centroideNPos[k] / numeroNPos;    
-                    }
+                if (npos) {
+                    centroids[i][k] -= centroideNPos[k] / numeroNPos;
+                }
+
             }
 
-//            for (int k = 0; k < parole.length; k++) {
-//                text += centroids[i][k] + (k != parole.length - 1 ? "," : "\n");
-//            }
             if (print) {
                 System.out.println("centroide num " + i + " ");
             }
         }
 
-//        String par = "";
-//        for (String p : parole) {
-//            par += p + "\n";
-//        }
-//        try {
-//            String ext = "";
-//            if (npos) {
-//                ext += "_npos";
-//            } else {
-//                ext += "_nonpos";
-//            }
-//
-//            if (babel) {
-//                ext += "_babel";
-//            } else {
-//                ext += "_nobabel";
-//            }
-//
-//            Files.write(Paths.get("dizionario" + ext + ".txt"), par.getBytes());
-//            Files.write(Paths.get("centroids" + ext + ".txt"), text.getBytes());
-//
-//        } catch (IOException ex) {
-//            Logger.getLogger(Main_1_2.class
-//                    .getName()).log(Level.SEVERE, null,
-//                            ex);
-//        }
     }
 
     /*
@@ -270,6 +243,7 @@ public class Rocchio {
                 int[] x = new int[1];
                 x[0] = 0;
                 dict3.addToDizionario(linea, x);
+
             }
         } catch (IOException ex) {
             Logger.getLogger(Main_3.class

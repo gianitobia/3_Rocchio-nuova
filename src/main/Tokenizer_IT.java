@@ -1,6 +1,5 @@
 package main;
 
-
 import it.uniroma1.lcl.babelnet.BabelGloss;
 import it.uniroma1.lcl.babelnet.BabelNet;
 import it.uniroma1.lcl.babelnet.BabelNetConfiguration;
@@ -20,6 +19,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ *
+ * @author Tobia Giani, Salvo Cirinà
  *
  * La classe analizza morph-it_048_UTF8 e cerca di creare un tokenizzatore
  *
@@ -55,7 +56,7 @@ public class Tokenizer_IT {
         try {
             String line;
             BufferedReader br = new BufferedReader(new FileReader(
-                    "src/stopwords.txt"));
+                    "src/main/stopwords.txt"));
             while ((line = br.readLine()) != null) {
                 if (!line.contains("|") && !line.equals("")) {
                     stopWords.add(line);
